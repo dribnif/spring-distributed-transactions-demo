@@ -18,6 +18,7 @@ public class OrderProcessorService {
     public void createOrder(Order order) throws IOException {
         IncomingOrder incomingOrder = createIncomingOrder(order);
         ShippingOrder shippingOrder = createShippingOrder(order);
+
     }
 
     //protected to enable quick testability
@@ -37,20 +38,17 @@ public class OrderProcessorService {
                 .append(shippingAddress.getPostCode()).append(", ")
                 .append(shippingAddress.getCountry()).toString();
 
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final ByteArrayOutputStream outPutStream = new ByteArrayOutputStream();
         final ObjectMapper mapper = new ObjectMapper();
-
-        mapper.writeValue(out, order.getItems());
-
-        final byte[] data = out.toByteArray();
-        System.out.println(new String(data));
+        mapper.writeValue(outPutStream, order.getItems());
 
         return ShippingOrder.builder()
                 .firstnameLastname(firstnameLastname)
                 .streetCityPostcodeCountry(streetCityPostcodeCountry)
-                .itemsJson(new String(data))
+                .itemsJson(new String(outPutStream.toByteArray()))
                 .build();
     }
+
     //protected to enable quick testability
     protected IncomingOrder createIncomingOrder(Order order) {
         return null;
