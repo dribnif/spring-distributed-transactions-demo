@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class OrderProcessorServiceTest {
 
-
     private static OrderProcessorService service;
 
 
@@ -39,15 +38,21 @@ class OrderProcessorServiceTest {
 
     @Test
     void given_aValidOrder_when_createShippingOrder_then_validShippingOrderCreated() throws IOException {
+        //given
         Order order = createOrder();
+
+        //when
         ShippingOrder shippingOrder = service.createShippingOrder(order);
+
+        //then
         assertThat(shippingOrder, notNullValue());
         assertThat(shippingOrder.getFirstnameLastname(), is("Jeffrey Lebowski"));
         assertThat(shippingOrder.getStreetCityPostcodeCountry(),
                 is("606 Venezia Ave, Venice, CA 90291, USA"));
         assertThat(shippingOrder.getItemsJson(),
                 is("[{\"description\":\"Bowling ball\"," +
-                        "\"quantity\":2,\"price\":68.56},{\"description\":\"Bowling Shoes\"," +
+                        "\"quantity\":2,\"price\":68.56}," +
+                        "{\"description\":\"Bowling Shoes\"," +
                         "\"quantity\":1,\"price\":145.99}]"));
     }
 
