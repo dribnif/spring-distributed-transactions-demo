@@ -1,5 +1,4 @@
-package de.metamorphant.demo.spring.transactions.dao.warehouse.model;
-
+package de.metamorphant.demo.spring.transactions.dao.accounting.model;
 
 import lombok.*;
 
@@ -7,6 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.math.BigDecimal;
 
 @Entity
 @Getter
@@ -14,20 +14,19 @@ import javax.persistence.Id;
 @Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
-public class ShippingOrder {
+public class IncomingOrderItems {
+
 
     @Id
     @GeneratedValue
-    private long id;
+    private Long id;
 
     @Column
-    private String firstnameLastname;
+    private String description;
 
     @Column
-    private String streetCityPostcodeCountry;
+    private float quantity;
 
     @Column
-    private String itemsJson;
-
-
+    private BigDecimal price;
 }

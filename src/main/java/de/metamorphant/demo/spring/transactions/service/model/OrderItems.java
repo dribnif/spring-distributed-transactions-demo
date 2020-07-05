@@ -7,7 +7,6 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 
 @Getter
 @Setter
@@ -15,6 +14,6 @@ import java.math.BigInteger;
 @ToString
 public class OrderItems {
     private String description;
-    private int quantity;
+    private float quantity;
     private BigDecimal price;
 }
