@@ -1,5 +1,6 @@
 package de.metamorphant.demo.spring.transactions.service;
 
+import de.metamorphant.demo.spring.transactions.SpringTransactionsApplication;
 import de.metamorphant.demo.spring.transactions.dao.accounting.model.IncomingOrder;
 import de.metamorphant.demo.spring.transactions.dao.accounting.repositories.AccountingIncomingOrdersRepository;
 import de.metamorphant.demo.spring.transactions.dao.warehouse.model.ShippingOrder;
@@ -7,11 +8,18 @@ import de.metamorphant.demo.spring.transactions.dao.warehouse.repositories.Wareh
 import de.metamorphant.demo.spring.transactions.service.model.Address;
 import de.metamorphant.demo.spring.transactions.service.model.Order;
 import de.metamorphant.demo.spring.transactions.service.model.OrderItems;
+import de.metamorphant.demo.spring.transactions.service.transformer.OrderTransformer;
+import de.metamorphant.demo.spring.transactions.service.transformer.ShippingOrderTransformer;
 import de.metamorphant.demo.spring.transactions.service.transformer.TransformationException;
+import de.metamorphant.demo.spring.transactions.service.utils.BrokenShippingOrderTransformer;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.io.IOException;
@@ -23,10 +31,23 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.emptyCollectionOf;
+import static org.hamcrest.Matchers.nullValue;
 
 @SpringBootTest
 @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-class OrderProcessorServiceTest {
+class OrderProcessorServiceTransactionHandlingTest {
+
+    @TestConfiguration
+    @Import(SpringTransactionsApplication.class)
+    public static class TestConfig{
+
+        @Bean("shippingOrderTransformer")
+        @Primary
+        public OrderTransformer<ShippingOrder> shippingOrderTransformer(){
+            return new BrokenShippingOrderTransformer();
+        }
+    }
 
     @Autowired
     private OrderProcessorService orderProcessorService;
@@ -44,38 +65,19 @@ class OrderProcessorServiceTest {
         Order order = createOrder();
 
         //when
-        orderProcessorService.createOrder(order);
+        try {
+            orderProcessorService.createOrder(order);
+        } catch (TransformationException te){
+            //ignore exception since we're interesting in the state of the database
+        }
 
         //then
         List<ShippingOrder> createdShippingOrders = shippingOrdersRepository.findAll();
         List<IncomingOrder> createdIncomingOrders = incomingOrdersRepository.findAll();
 
 
-        assertThat(createdShippingOrders, notNullValue());
-        assertThat(createdShippingOrders.size(), is(1));
-        ShippingOrder actualShippingOrder = createdShippingOrders.get(0);
-        //merely spot-checking some properties of the created objects
-        assertThat(actualShippingOrder, notNullValue());
-        assertThat(actualShippingOrder.getFirstnameLastname(), is("Jeffrey Lebowski"));
-        assertThat(actualShippingOrder.getStreetCityPostcodeCountry(),
-                is("606 Venezia Ave, Venice, CA 90291, USA"));
-        assertThat(actualShippingOrder.getItemsJson(), is("[{\"description\":\"Bowling ball\"," +
-                "\"quantity\":2.0,\"price\":68.56}," +
-                "{\"description\":\"Bowling Shoes\"," +
-                "\"quantity\":1.0,\"price\":145.99}]"));
-
-
-        //merely spot-checking some properties of the created objects
-        assertThat(createdIncomingOrders, notNullValue());
-        assertThat(createdIncomingOrders.size(), is(1));
-        IncomingOrder actualIncomingOrder = createdIncomingOrders.get(0);
-        assertThat(actualIncomingOrder, notNullValue());
-        assertThat(actualIncomingOrder.getTotal(), Matchers.is(new BigDecimal("214.55")));
-        assertThat(actualIncomingOrder.getOrderItems(), notNullValue());
-        assertThat(actualIncomingOrder.getOrderItems().size(), is(2));
-        assertThat(actualIncomingOrder.getOrderItems().get(0), notNullValue());
-        assertThat(actualIncomingOrder.getOrderItems().get(0).getDescription(), is("Bowling ball"));
-        assertThat(actualIncomingOrder.getOrderItems().get(1).getDescription(), is("Bowling Shoes"));
+        assertThat(createdShippingOrders, emptyCollectionOf(ShippingOrder.class));
+        assertThat(createdIncomingOrders, emptyCollectionOf(IncomingOrder.class));
 
     }
 

@@ -22,17 +22,17 @@ class ShippingOrderTransformerTest {
     private ShippingOrderTransformer transformer = new ShippingOrderTransformer();
 
     @Test
-    void given_aNullOrder_when_createShippingOrder_then_nullShippingOrderCreated() throws IOException {
-        assertThat(transformer.createShippingOrder(null), nullValue());
+    void given_aNullOrder_when_createShippingOrder_then_nullShippingOrderCreated() throws TransformationException {
+        assertThat(transformer.transformOrder(null), nullValue());
     }
 
     @Test
-    void given_aValidOrder_when_createShippingOrder_then_validShippingOrderCreated() throws IOException {
+    void given_aValidOrder_when_createShippingOrder_then_validShippingOrderCreated() throws TransformationException {
         //given
         Order order = createOrder();
 
         //when
-        ShippingOrder shippingOrder = transformer.createShippingOrder(order);
+        ShippingOrder shippingOrder = transformer.transformOrder(order);
 
         //then
         assertThat(shippingOrder, notNullValue());

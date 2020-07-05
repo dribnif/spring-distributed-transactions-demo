@@ -21,7 +21,7 @@ class IncomingOrderTransformerTest {
 
     @Test
     void given_aNullOrder_when_createIncomingOrder_then_nullShippingOrderCreated() throws IOException {
-        assertThat(transformer.createIncomingOrder(null), nullValue());
+        assertThat(transformer.transformOrder(null), nullValue());
     }
 
     @Test
@@ -30,7 +30,7 @@ class IncomingOrderTransformerTest {
         Order order = createOrder();
 
         //when
-        IncomingOrder incomingOrder = transformer.createIncomingOrder(order);
+        IncomingOrder incomingOrder = transformer.transformOrder(order);
 
         //then
         assertThat(incomingOrder, notNullValue());

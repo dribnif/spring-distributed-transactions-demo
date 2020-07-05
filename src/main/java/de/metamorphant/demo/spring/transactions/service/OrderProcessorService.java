@@ -6,7 +6,9 @@ import de.metamorphant.demo.spring.transactions.dao.warehouse.model.ShippingOrde
 import de.metamorphant.demo.spring.transactions.dao.warehouse.repositories.WarehouseShippingOrdersRepository;
 import de.metamorphant.demo.spring.transactions.service.model.Order;
 import de.metamorphant.demo.spring.transactions.service.transformer.IncomingOrderTransformer;
+import de.metamorphant.demo.spring.transactions.service.transformer.OrderTransformer;
 import de.metamorphant.demo.spring.transactions.service.transformer.ShippingOrderTransformer;
+import de.metamorphant.demo.spring.transactions.service.transformer.TransformationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -20,10 +22,10 @@ import java.io.IOException;
 public class OrderProcessorService {
 
     @Autowired
-    private IncomingOrderTransformer incomingOrderTransformer;
+    private OrderTransformer<IncomingOrder> incomingOrderTransformer;
 
     @Autowired
-    private ShippingOrderTransformer shippingOrderTransformer;
+    private OrderTransformer<ShippingOrder> shippingOrderTransformer;
 
     @Autowired
     private WarehouseShippingOrdersRepository shippingOrdersRepository;
@@ -32,11 +34,11 @@ public class OrderProcessorService {
     private AccountingIncomingOrdersRepository incomingOrdersRepository;
 
     @Transactional(value = "chainedTransactionManager", rollbackFor = {Exception.class}, isolation = Isolation.READ_UNCOMMITTED)
-    public void createOrder(Order order) throws IOException {
-        IncomingOrder incomingOrder = incomingOrderTransformer.createIncomingOrder(order);
-        ShippingOrder shippingOrder = shippingOrderTransformer.createShippingOrder(order);
-
+    public void createOrder(Order order) throws TransformationException {
+        IncomingOrder incomingOrder = incomingOrderTransformer.transformOrder(order);
         incomingOrdersRepository.save(incomingOrder);
+
+        ShippingOrder shippingOrder = shippingOrderTransformer.transformOrder(order);
         shippingOrdersRepository.save(shippingOrder);
 
     }

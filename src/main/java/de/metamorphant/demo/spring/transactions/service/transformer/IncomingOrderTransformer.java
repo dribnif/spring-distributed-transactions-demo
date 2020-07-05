@@ -14,8 +14,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class IncomingOrderTransformer {
-    public IncomingOrder createIncomingOrder(Order order) {
+public class IncomingOrderTransformer implements OrderTransformer<IncomingOrder> {
+
+    public IncomingOrder transformOrder(Order order) {
         if (order == null){
             return null;
         }

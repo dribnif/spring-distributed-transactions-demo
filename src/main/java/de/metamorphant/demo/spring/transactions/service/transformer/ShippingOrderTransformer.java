@@ -10,9 +10,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 @Component
-public class ShippingOrderTransformer {
+public class ShippingOrderTransformer implements OrderTransformer<ShippingOrder>{
 
-    public ShippingOrder createShippingOrder(Order order) throws IOException {
+    public ShippingOrder transformOrder(Order order) throws TransformationException {
         if (order == null){
             return null;
         }
@@ -28,14 +28,19 @@ public class ShippingOrderTransformer {
                 .append(shippingAddress.getPostCode()).append(", ")
                 .append(shippingAddress.getCountry()).toString();
 
-        final ByteArrayOutputStream outPutStream = new ByteArrayOutputStream();
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         final ObjectMapper mapper = new ObjectMapper();
-        mapper.writeValue(outPutStream, order.getItems());
+        try {
+
+            mapper.writeValue(outputStream, order.getItems());
+        } catch (IOException ioe){
+            throw new TransformationException("Failed to serialize items to JSON", ioe);
+        }
 
         return ShippingOrder.builder()
                 .firstnameLastname(firstnameLastname)
                 .streetCityPostcodeCountry(streetCityPostcodeCountry)
-                .itemsJson(new String(outPutStream.toByteArray()))
+                .itemsJson(new String(outputStream.toByteArray()))
                 .build();
     }
 }
