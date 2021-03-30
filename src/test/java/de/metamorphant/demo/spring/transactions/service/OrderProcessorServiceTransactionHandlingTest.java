@@ -67,6 +67,7 @@ class OrderProcessorServiceTransactionHandlingTest {
         //when
         try {
             orderProcessorService.createOrder(order);
+            //this will use the BrokenShippingOrderTransformer and thus fail by throwing a TransformationException
         } catch (TransformationException te){
             //ignore exception since we're interesting in the state of the database
         }
