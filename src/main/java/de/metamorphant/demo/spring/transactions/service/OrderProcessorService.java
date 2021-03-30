@@ -38,7 +38,7 @@ public class OrderProcessorService {
         IncomingOrder incomingOrder = incomingOrderTransformer.transformOrder(order);
         incomingOrdersRepository.save(incomingOrder);
 
-        ShippingOrder shippingOrder = shippingOrderTransformer.transformOrder(order);
+        ShippingOrder shippingOrder = shippingOrderTransformer.transformOrder(order);  // for demonstrating the rollbacks by the chainedTransactionManager we will "break" the above line in our test
         shippingOrdersRepository.save(shippingOrder);
 
     }
